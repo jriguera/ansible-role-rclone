@@ -1,0 +1,23 @@
+---
+- name: Control if the role is supported on this system
+  fail: msg="Rclone role is not supported on this system"
+  when: >
+     ansible_distribution != 'Ubuntu' and
+     ansible_distribution != 'CentOS' and
+     ansible_distribution != 'Debian' and
+     ansible_distribution != 'RedHat'
+
+- name: Include OS specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: ["distribution", "packages", "service", "rclone"]
+
+- include: install.yml
+  tags: ["rclone", "install"]
+
+- include: configure.yml
+  tags: ["rclone", "configure"]
+
+- include: backups.yml
+  when: rclone_backups is defined and rclone_backups
+  tags: ["rclone", "backups"]
+

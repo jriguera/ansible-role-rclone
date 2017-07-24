@@ -1,0 +1,13 @@
+---
+- name: Generate rclone configuration file
+  template:
+    src: rclone.conf.j2
+    dest: "{{ rclone_config_file }}"
+    owner: "{{ rclone_user }}"
+    group: "{{ rclone_group }}"
+    mode: 0640
+  register: __rclone_updated_conf
+
+- name: Checking if rclone configuration was updated
+  set_fact:
+    _rclone_updated: "{{ __rclone_updated_conf.changed }}"

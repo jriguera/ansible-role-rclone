@@ -1,0 +1,50 @@
+---
+- name: Define rclone systemd target properties
+  template:
+    src: systemd.target.j2
+    dest: "{{ rclone_backup_systemd_dir }}/{{ rclone_service_name }}.target"
+    mode: 0644
+    owner: "{{ rclone_user }}"
+    group: "{{ rclone_group }}"
+  register: __rclone_target
+
+- name: Define notify systemd target properties
+  template:
+    src: rclone-notify-error.target.j2
+    dest: "{{ rclone_backup_systemd_dir }}/{{ rclone_notify_service_name }}.target"
+    mode: 0644
+    owner: "{{ rclone_user }}"
+    group: "{{ rclone_group }}"
+  register: __rclone_notify_target
+
+- name: Define rclone system timer properties
+  template:
+    src: systemd.timer.j2
+    dest: "{{ rclone_backup_systemd_dir }}/{{ rclone_service_name }}.timer"
+    mode: 0644
+    owner: "{{ rclone_user }}"
+    group: "{{ rclone_group }}"
+  register: __rclone_timer
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+  become: true
+  when: __rclone_target|changed or __rclone_notify_target|changed or __rclone_timer|changed
+
+- name: Enable rclone timer for backups
+  systemd:
+    name: "{{ rclone_service_name }}.timer"
+    state: "{{ rclone_backup_timer_state }}"
+    enabled: "{{ rclone_backup_timer_enable }}"
+  become: true
+
+- name: Define backup folders
+  include: backup.yml
+  with_items: "{{ rclone_backups }}"
+
+- name: Define backup osd notifications
+  include: osd_notification.yml
+  with_items: "{{ rclone_backups | selectattr('osd_notify_user', 'defined') | map(attribute='osd_notify_user') | list | unique }}"
+
+# TODO: DELETE items
+

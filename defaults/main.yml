@@ -1,0 +1,42 @@
+---
+rclone_version: "1.36"
+rclone_config_file: "/etc/rclone.conf"
+
+# Configuration settings definition dictionary
+#
+# Example:
+# rclone_config:
+#  AmazonCloud:
+#    type: "amazon cloud drive"
+#    client_id: null
+#    client_secret: null
+#    token: '{"access_token":"balblablaa","expiry":"2017-05-13T17:19:52.022195275+02:00"}'
+#
+rclone_config: {}
+
+# Backup definition settings
+rclone_backup_timer_enable: true
+rclone_backup_timer_state: started
+# Backup every 2 hours
+rclone_backup_timer_cron: "*:0/30"
+rclone_backup_boot_delay: "15min"
+
+# Folder backup definition list. Each item has
+#
+# enable: Enable systemd service, defaults to true
+# delete: Delete all files created, defaults to false
+# destination: Rclone configuration destination name
+# operation: Rclone command, defaults to sync
+# folder: Directory where to perform backups from
+# args: Additional arguments for the command, defaults to --copy-links
+# osd_notify_user: enabled osd notifications to the specified user
+#
+# Example:
+# rclone_backups:
+#   - destination: "AmazonCloud"
+#     folder: "/var"
+#     args: "--copy-links --one-file-system"
+#     filters: []
+#     osd_notify_user: jriguera
+#
+rclone_backups: []

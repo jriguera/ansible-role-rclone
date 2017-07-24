@@ -1,0 +1,5 @@
+---
+rclone_required_packages:
+  unzip:
+    state: latest
+

@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: Jose Riguera Lopez (jriguera@gmail.com)
+  description: Install and setup rclone on RedHat/Debian based distributions
+  license: Apache 2.0
+  min_ansible_version: 2.1
+
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Ubuntu
+    versions:
+    - xenial
+  - name: Debian
+    versions:
+    - jessie
+
+  categories:
+    - backup
+    - system
+
+dependencies: []

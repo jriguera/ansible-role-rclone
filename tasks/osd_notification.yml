@@ -1,0 +1,44 @@
+---
+- name: "Procesing rclone osd notification for {{ item }}"
+  set_fact:
+    _rclone_backup_osd_notification_user: "{{ item }}"
+    _rclone_backup_osd_notification_enabled: "{{ service_osd_enabled | default(true) }}"
+    _rclone_backup_osd_notification_delete: "{{ service_osd_delete | default(false) }}"
+
+
+- block:
+  - name: Define service error notification
+    template:
+      src: rclone-notify-error-osd.service.j2
+      dest: "{{ rclone_backup_systemd_dir }}/{{ rclone_notify_osd_service_name }}@{{ _rclone_backup_osd_notification_user }}.service"
+      mode: 0644
+      owner: "{{ rclone_user }}"
+      group: "{{ rclone_group }}"
+    notify:
+      - reload systemd
+
+  - name: Enable service error notification
+    systemd:
+      name: "{{ rclone_notify_osd_service_name }}@{{ _rclone_backup_osd_notification_user }}.service"
+      state: stopped
+      enabled: "{{ _rclone_backup_osd_notification_enabled }}"
+    become: true
+  when: not _rclone_backup_osd_notification_delete
+
+
+- block:
+  - name: Disable service error notification
+    systemd:
+      name: "{{ rclone_notify_osd_service_name }}@{{ _rclone_backup_osd_notification_user }}.service"
+      state: stopped
+      enabled: false
+    become: true
+
+  - name: Delete service error notification
+    file:
+      path: "{{ rclone_backup_systemd_dir }}/{{ rclone_notify_osd_service_name }}@{{ _rclone_backup_osd_notification_user }}.service"
+      state: absent
+    notify:
+      - reload systemd
+  when: _rclone_backup_osd_notification_delete
+

@@ -1,0 +1,17 @@
+[Unit]
+Description=Notify %I on screen
+StopWhenUnneeded=true
+ConditionPathExists=/usr/bin/notify-send
+PartOf={{ rclone_notify_service_name }}.target
+
+[Service]
+Type=simple
+User=root
+Environment=XAUTHORITY=/home/%I/.Xauthority
+Environment=DISPLAY=:0
+ExecStartPre=/usr/bin/notify-send "Backup Failed!" "Rclone backup failed, please check to fix systemctl list-timers" --icon=dialog-error
+ExecStart=/usr/bin/logger -s -t rclone "Rclone backup failed!, please check to fix systemctl list-timers and systemctl status"
+ExecStop=/bin/true
+
+[Install]
+WantedBy={{ rclone_notify_service_name }}.target

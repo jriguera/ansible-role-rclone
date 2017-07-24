@@ -1,0 +1,75 @@
+---
+- name: "Procesing rclone backup folder {{ item['folder'] }}"
+  set_fact:
+    _rclone_backup_dir: "{{ item['folder'] }}"
+    _rclone_backup_destination: "{{ item['destination'] }}"
+    _rclone_backup_enabled: "{{ item['enable'] | default(true) }}"
+    _rclone_backup_delete: "{{ item['delete'] | default(false) }}"
+    _rclone_backup_operation: "{{ item['sync'] | default('sync') }}"
+    _rclone_backup_args: "{{ item['args'] | default('--copy-links') }}"
+    _rclone_backup_osd_notify_user: "{{ item['osd_notify_user'] | default('') }}"
+    _rclone_backup_filters: "{{ item['filters'] | default([]) }}"
+
+
+- block:
+  - name: "Define configuration backup {{ _rclone_backup_dir }}/{{ rclone_backup_config }}"
+    template:
+      src: backup.conf.j2
+      dest: "{{ _rclone_backup_dir }}/{{ rclone_backup_config }}"
+      mode: 0640
+      owner: "{{ rclone_user }}"
+      group: "{{ rclone_group }}"
+
+  - name: "Define configuration backup {{ _rclone_backup_dir }}/{{ rclone_backup_filters }}"
+    template:
+      src: backup.filters.j2
+      dest: "{{ _rclone_backup_dir }}/{{ rclone_backup_filters }}"
+      mode: 0640
+      owner: "{{ rclone_user }}"
+      group: "{{ rclone_group }}"
+
+  - name: Define service backup
+    template:
+      src: systemd.service.j2
+      dest: "{{ rclone_backup_systemd_dir }}/{{ rclone_service_name }}@{{ _rclone_backup_dir | regex_replace('/', '-') }}.service"
+      mode: 0644
+      owner: "{{ rclone_user }}"
+      group: "{{ rclone_group }}"
+    notify:
+      - reload systemd
+
+  - name: Enable service backup
+    systemd:
+      name: "{{ rclone_service_name }}@{{ _rclone_backup_dir | regex_replace('/', '-') }}.service"
+      state: stopped
+      enabled: "{{ _rclone_backup_enabled }}"
+    become: true
+  when: not _rclone_backup_delete
+
+
+- block:
+  - name: "Delete configuration backup {{ _rclone_backup_dir }}/{{ rclone_backup_config }}"
+    file:
+      path: "{{ _rclone_backup_dir }}/{{ rclone_backup_config }}"
+      state: absent
+
+  - name: "Delete configuration backup {{ _rclone_backup_dir }}/{{ rclone_backup_filters }} filters"
+    file:
+      path: "{{ _rclone_backup_dir }}/{{ rclone_backup_filters }}"
+      state: absent
+
+  - name: Disable service backup
+    systemd:
+      name: "{{ rclone_service_name }}@{{ _rclone_backup_dir | regex_replace('/', '-') }}.service"
+      state: stopped
+      enabled: false
+    become: true
+
+  - name: Delete service backup
+    file:
+      path: "{{ rclone_backup_systemd_dir }}/{{ rclone_service_name }}@{{ _rclone_backup_dir | regex_replace('/', '-') }}.service"
+      state: absent
+    notify:
+      - reload systemd
+  when: _rclone_backup_delete
+

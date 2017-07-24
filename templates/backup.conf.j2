@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+{% if _rclone_backup_osd_notify_user is defined and not _rclone_backup_osd_notify_user is none -%}
+XAUTHORITY=/home/{{ _rclone_backup_osd_notify_user }}/.Xauthority
+DISPLAY=:0
+{% endif %}
+
+RCLONE_CONFIG={{ rclone_config_file }}
+{% if _rclone_backup_filters -%}
+RCLONE_ARGS=-"-filter-from={{ _rclone_backup_dir }}/{{ rclone_backup_filters }} {{ _rclone_backup_args }}"
+{% else %}
+RCLONE_ARGS="{{ _rclone_backup_args }}"
+{% endif %}
+RCLONE_OPER={{ _rclone_backup_operation }}
+RCLONE_DEST={{ _rclone_backup_destination }}
+

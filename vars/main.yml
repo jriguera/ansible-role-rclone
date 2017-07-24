@@ -1,0 +1,20 @@
+---
+rclone_url: "https://github.com/ncw/rclone/releases/download/v{{ rclone_version }}/rclone-v{{ rclone_version }}-linux-amd64.zip"
+
+rclone_setup_tmp_dir: "/tmp/rclone-setup"
+rclone_manual_dir: "/usr/local/share/man/man1"
+rclone_binary: "/usr/local/bin/rclone"
+rclone_backup_systemd_dir: "/etc/systemd/system"
+rclone_user: root
+rclone_group: root
+
+rclone_backup_config: ".backup.conf"
+rclone_backup_filters: ".backup.filters"
+rclone_service_name: rclone
+rclone_notify_service_name: rclone-notify-error
+rclone_notify_osd_service_name: rclone-notify-error-osd
+
+rclone_required_packages:
+  unzip:
+    state: latest
+

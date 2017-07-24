@@ -1,0 +1,11 @@
+---
+- name: Rclone setup
+  hosts: all
+  gather_facts: true
+  become: true
+  pre_tasks:
+     - name: Display all variables/facts known for a host
+       debug: var=hostvars[inventory_hostname]
+  roles:
+     - role: .
+

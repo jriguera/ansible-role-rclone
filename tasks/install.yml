@@ -1,0 +1,68 @@
+---
+- name: Check if rclone binary exists
+  stat:
+    path: "{{ rclone_binary }}"
+  register: __rclone_binary
+
+- name: Rclone binary fact
+  set_fact:
+    _rclone_previous: "{{ __rclone_binary.stat.exists }}"
+
+- name: Install Rclone required packages
+  package:
+    name: "{{ item.key if ('version' not in item.value) else ('%s-%s' % (item.key, item.value['version'])) }}"
+    state: "{{ item.value.state | default('present') }}"
+  with_dict: "{{ rclone_required_packages }}"
+  register: __rclone_required
+  tags: ["packages"]
+
+- name: Check if Rclone required packages were installed
+  set_fact:
+    _rclone_reinstalled: "{{ __rclone_required|changed }}"
+
+- name: Make temp dir to install rclone
+  file:
+    path: "{{ rclone_setup_tmp_dir }}"
+    state: directory
+    mode: 0775
+
+- name: Unzip rclone to temp dir
+  unarchive:
+    src: "{{ rclone_url }}"
+    dest: "{{ rclone_setup_tmp_dir }}"
+    copy: false
+    creates: "{{ rclone_setup_tmp_dir }}/rclone-v{{ rclone_version }}-linux-amd64"
+
+- name: Install rclone binary
+  copy:
+    src: "{{ rclone_setup_tmp_dir }}/rclone-v{{ rclone_version }}-linux-amd64/rclone"
+    dest: "{{ rclone_binary }}"
+    mode: 0755
+    owner: "{{ rclone_user }}"
+    group: "{{ rclone_group }}"
+    remote_src: true
+
+- block:
+    - name: Make directory for local manpages
+      file:
+        path: "{{ rclone_manual_dir }}"
+        state: directory
+        mode: 0775
+        owner: "{{ rclone_user }}"
+        group: "{{ rclone_group }}"
+
+    - name: Copy manpage to manual directory
+      copy:
+        src: "{{ rclone_setup_tmp_dir }}/rclone-v{{ rclone_version }}-linux-amd64/rclone.1"
+        dest: "{{ rclone_manual_dir }}/rclone.1"
+        mode: 0644
+        owner: "{{ rclone_user }}"
+        group: "{{ rclone_group }}"
+        remote_src: true
+
+    - name: Update manpages
+      shell: mandb
+      changed_when: false
+      become: true
+  when: rclone_manual_dir is defined and rclone_manual_dir
+

@@ -1,0 +1,13 @@
+[Unit]
+Description=Timer to run rclone backups
+Wants=network-online.target
+After=network.target network-online.target
+
+[Timer]
+Persistent=false
+OnBootSec={{ rclone_backup_boot_delay }}
+OnCalendar={{ rclone_backup_timer_cron }}
+Unit={{ rclone_service_name }}.target
+
+[Install]
+WantedBy=timers.target

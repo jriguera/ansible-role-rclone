@@ -1,0 +1,7 @@
+[Unit]
+Description=Rclone error notifier
+StopWhenUnneeded=true
+
+[Install]
+WantedBy=multi-user.target {{ rclone_service_name }}.target
+

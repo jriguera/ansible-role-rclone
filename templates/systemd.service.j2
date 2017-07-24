@@ -1,0 +1,21 @@
+[Unit]
+Description=Backup on %I with rclone
+ConditionPathExists=%I/{{ rclone_backup_config }}
+ConditionFileIsExecutable={{ rclone_binary }}
+ConditionACPower=true
+OnFailure={{ rclone_notify_service_name }}.target
+PartOf={{ rclone_service_name }}.target
+
+[Service]
+Type=simple
+User={{ rclone_user }}
+EnvironmentFile=-%I/{{ rclone_backup_config }}
+WorkingDirectory=%I
+ExecStart={{ rclone_binary }} -v --config=${RCLONE_CONFIG} ${RCLONE_OPER} %I ${RCLONE_DEST}:%H%I $RCLONE_ARGS
+{% if _rclone_backup_osd_notify_user is defined and not _rclone_backup_osd_notify_user is none -%}
+ExecStartPre=/usr/bin/notify-send "Backup %I" "Running rclone backup" --icon=drive-harddisk
+ExecStop=/usr/bin/notify-send "Backup %I" "Successfully finished rclone backup" --icon=dialog-information
+{% endif %}
+
+[Install]
+WantedBy={{ rclone_service_name }}.target

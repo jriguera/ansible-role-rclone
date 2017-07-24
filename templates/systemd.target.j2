@@ -1,0 +1,9 @@
+[Unit]
+Description=Run rclone for backups
+StopWhenUnneeded=true
+Wants=network-online.target {{ rclone_service_name }}.timer
+After=network.target network-online.target
+OnFailure={{ rclone_notify_service_name }}.target
+
+[Install]
+WantedBy=multi-user.target
