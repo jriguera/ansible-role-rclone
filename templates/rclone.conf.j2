@@ -1,7 +1,7 @@
 {% if rclone_config -%}
-{% for (remote, options) in rclone_config.iteritems() %}
+{% for (remote, options) in rclone_config.items() %}
 [{{ remote }}]
-{% for (key, value) in options.iteritems() %}
+{% for (key, value) in options.items() %}
 {{ key }} = {{ value }}
 {% endfor %}
 
