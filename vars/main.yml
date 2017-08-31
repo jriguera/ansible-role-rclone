@@ -17,4 +17,6 @@ rclone_notify_osd_service_name: rclone-notify-error-osd
 rclone_required_packages:
   unzip:
     state: latest
+  libnotify-bin:
+    state: latest
 
