@@ -2,4 +2,6 @@
 rclone_required_packages:
   unzip:
     state: latest
+  libnotify-bin:
+    state: latest
 
