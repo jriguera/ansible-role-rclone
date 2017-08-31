@@ -7,7 +7,7 @@ DISPLAY=:0
 
 RCLONE_CONFIG={{ rclone_config_file }}
 {% if _rclone_backup_filters -%}
-RCLONE_ARGS=-"-filter-from={{ _rclone_backup_dir }}/{{ rclone_backup_filters }} {{ _rclone_backup_args }}"
+RCLONE_ARGS="--filter-from={{ _rclone_backup_dir }}/{{ rclone_backup_filters }} {{ _rclone_backup_args }}"
 {% else %}
 RCLONE_ARGS="{{ _rclone_backup_args }}"
 {% endif %}
